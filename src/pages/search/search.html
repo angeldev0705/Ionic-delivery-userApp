@@ -1,0 +1,222 @@
+<ion-header class="header_gradient">
+	<ion-navbar>
+		<button ion-button menuToggle>
+			<ion-icon name="menu"></ion-icon>
+		</button>
+		<ion-title *ngIf="phase == 1" text-uppercase>{{'book_your_ride' | translate}}</ion-title>
+		<ion-title *ngIf="phase == 2 && ride" text-uppercase>{{'finding_your_ride' | translate}}</ion-title>
+	</ion-navbar>
+	<ion-list class="animated zoomIn delay_3" *ngIf="phase == 1" no-lines>
+		<ion-item>
+			<div class="d-flex item_box">
+				<ion-icon class="material-icons" (click)="detect()">location_on</ion-icon>
+				<ion-searchbar [(ngModel)]="querySource" (ionInput)="searchPlaceSource()"
+					placeholder="{{'enter_source' | translate}}"></ion-searchbar>
+			</div>
+		</ion-item>
+		<ion-item>
+			<div class="d-flex item_box">
+				<ion-icon class="material-icons">near_me</ion-icon>
+				<ion-searchbar [(ngModel)]="queryDestination" (ionInput)="searchPlaceDestination()"
+					placeholder="{{'enter_destination' | translate}}"></ion-searchbar>
+			</div>
+		</ion-item>
+	</ion-list>
+</ion-header>
+
+<ion-content class="bg-color" fullscreen>
+	<div #pleaseConnect id="please-connect">
+		<p>{{'please_connect_to_the_internet' | translate}}</p>
+	</div>
+	<div #map id="map" class="map">
+		<ion-spinner></ion-spinner>
+	</div>
+
+	<div *ngIf="phase == 1">
+		<ion-list no-lines *ngIf="places && places.length" class="search_list">
+			<ion-item class="animated slideInRight" *ngFor="let place of places">
+				<div class="d-flex item_box" (click)="selectPlace(place)">
+					<ion-icon class="material-icons">room</ion-icon>
+					<h2>{{place.description}}</h2>
+				</div>
+			</ion-item>
+		</ion-list>
+
+		<div class="payment_option" [ngClass]="fabAction ? 'active' : ''">
+			<h2 class="d-flex" [ngClass]="payment_method == 'cash' ? 'selected' : '' "
+				(click)="setPaymentMethod('cash')">
+				<ion-icon class="zmdi zmdi-money-box"></ion-icon>
+				{{'cash' | translate}}
+			</h2>
+			<h2 class="d-flex " [ngClass]="payment_method == 'wallet' ? 'selected' : '' "
+				(click)="setPaymentMethod('wallet')">
+				<ion-icon class="zmdi zmdi-balance-wallet"></ion-icon>
+				{{'wallet' | translate}}
+			</h2>
+		</div>
+	</div>
+
+	<div *ngIf="phase == 2">
+		<div *ngIf="ride">
+			<div class="serching_cab">
+				<div class="animation_box a"></div>
+				<div class="animation_box b"></div>
+				<div class="animation_box c"></div>
+				<div class="animation_box d"></div>
+				<!-- <ion-icon class="material-icons">fiber_manual_record</ion-icon> -->
+			</div>
+
+			<div class="banner animated zoomIn delay_4" (click)="cancelSearch()">
+				<div class="text">
+					<h2 [innerHTML]="'cancel_search' | translate"></h2>
+				</div>
+			</div>
+		</div>
+	</div>
+
+</ion-content>
+<ion-footer>
+	<div *ngIf="!ride && phase != 3">
+		<div *ngIf="phase == 1" class="phase_one">
+			<div class="btn_box d-flex" (click)="togglePaymentFab()">
+				<p>{{'select_payment_mode' | translate}}</p>
+				<h2 *ngIf="payment_method == 'wallet'" class="d-flex end">
+					<ion-icon class="material-icons">account_balance_wallet</ion-icon>
+					{{'wallet' | translate}}
+				</h2>
+				<h2 *ngIf="payment_method == 'cash'" class="d-flex end">
+					<ion-icon class="material-icons">account_balance_wallet</ion-icon>
+					{{'cash' | translate}}
+				</h2>
+			</div>
+			<button ion-button full no-margin text-uppercase clear (click)="next()" class="btn">
+				{{'continue' | translate}}
+			</button>
+		</div>
+
+		<div *ngIf="phase == 2" class="phase_two animated slideInUp delay_3">
+			<ion-list no-lines radio-group [(ngModel)]="vehicleTypeId" required>
+				<ion-scroll scrollX="true">
+					<ion-item *ngFor="let vt of vehicleTypes">
+						<ion-label>
+							<div class="img_box">
+								<img *ngIf="!vt.image_url || !vt.image_url.length" src="assets/imgs/car1.png">
+								<img *ngIf="vt.image_url && vt.image_url.length" data-src="{{vt.image_url}}">
+							</div>
+							<h2>{{vt.title}}</h2>
+							<h3>{{'approx' | translate}} {{currency}} {{vt.estimated_fare}}</h3>
+						</ion-label>
+						<ion-radio [value]="vt.id" (ionSelect)="loadNearbyDrivers()"></ion-radio>
+					</ion-item>
+				</ion-scroll>
+			</ion-list>
+			<button ion-button full no-margin text-uppercase clear (click)="next()" class="btn">
+				{{'continue' | translate}}
+			</button>
+		</div>
+	</div>
+
+	<div *ngIf="phase == 3"
+		[ngClass]="fabFooterAction ? 'phase_three active animated slideInUp delay_3' : 'phase_three'">
+		<ion-list no-lines>
+			<ion-item class="d-flex" (click)="toggleFab()">
+				<div class="img_box center_img" item-start>
+					<img *ngIf="!ride.driver.user.image_url || !ride.driver.user.image_url.length"
+						src="assets/imgs/empty_dp.png" class="crop_img">
+					<img *ngIf="ride.driver.user.image_url && ride.driver.user.image_url.length"
+						data-src="{{ride.driver.user.image_url}}" class="crop_img">
+				</div>
+				<h2 class="d-flex">
+					<span>{{ride.driver.user.name}}</span>
+					<ion-badge class="end">{{ride.driver.user.ratings}}
+						<ion-icon class="material-icons">star_rate
+						</ion-icon>
+					</ion-badge>
+				</h2>
+				<h3 class="d-flex">{{ride.driver.vehicle_type.title}}
+					<span class="end">{{'status' | translate}}</span>
+				</h3>
+				<h4 class="d-flex">{{ride.driver.vehicle_number}}
+					<span class="end">{{ ('ride_status_'+ride.status) | translate}}</span>
+				</h4>
+			</ion-item>
+			<ion-item>
+				<h5 class="d-flex">{{'ride_info' | translate}}
+					<span class="end">
+						<strong>{{ride.estimated_distance}} {{distanceUnit}}</strong>
+						({{ride.estimated_time}} {{'mins' | translate}})
+					</span>
+				</h5>
+				<div class="d-flex item_box">
+					<ion-icon class="material-icons">location_on</ion-icon>
+					<p>{{ride.address_from}}</p>
+				</div>
+				<div class="d-flex item_box">
+					<ion-icon class="material-icons">near_me</ion-icon>
+					<p>{{ride.address_to}}</p>
+				</div>
+			</ion-item>
+			<ion-item class="ride_details">
+				<ion-row>
+					<ion-col col-4>
+						<h5>{{'payment_via' | translate}}</h5>
+						<h2 class="d-flex">
+							<ion-icon *ngIf="ride.payment_method.slug == 'cash'" class="material-icons">
+								account_balance_wallet</ion-icon>
+							<ion-icon *ngIf="ride.payment_method.slug == 'wallet'" class="material-icons">
+								account_balance_wallet</ion-icon>
+							{{ride.payment_method.title}}
+						</h2>
+					</ion-col>
+					<ion-col col-4>
+						<h5>{{'ride_fare' | translate}}</h5>
+						<h2 class="d-flex">
+							<ion-icon *ngIf="ride.payment_method.slug == 'cash'" class="material-icons">
+								account_balance_wallet</ion-icon>
+							<ion-icon *ngIf="ride.payment_method.slug == 'wallet'" class="material-icons">
+								account_balance_wallet</ion-icon>
+							{{currency}} {{ride.estimated_fare}}
+						</h2>
+					</ion-col>
+					<ion-col col-4>
+						<h5>{{'ride_type' | translate}}</h5>
+						<h2 class="d-flex">
+							<ion-icon class="material-icons">directions_car</ion-icon>
+							{{ride.vehicle_type.title}}
+						</h2>
+					</ion-col>
+				</ion-row>
+			</ion-item>
+		</ion-list>
+		<div class="btn_box">
+			<ion-row justify-content-end>
+				<ion-col col-4 (click)="callRider()">
+					<h2>
+						<ion-icon class="material-icons">phone</ion-icon>
+						{{'call_now' | translate}}
+					</h2>
+				</ion-col>
+				<ion-col *ngIf="ride.status == 'pending' || ride.status == 'accepted' || ride.status == 'onway'" col-4
+					(click)="confirmCancel()">
+					<h2>
+						<ion-icon class="material-icons">clear</ion-icon>
+						{{'cancel' | translate}}
+					</h2>
+				</ion-col>
+				<ion-col col-4>
+					<h2 (click)="toggleFab()" class="more_less_btn">
+						<ion-icon class="material-icons">keyboard_arrow_up</ion-icon>
+						<span class="more">{{'more' | translate}}</span>
+						<span class="less">{{'less' | translate}}</span>
+					</h2>
+				</ion-col>
+			</ion-row>
+		</div>
+	</div>
+</ion-footer>
+<div *ngIf="config.demoMode && phase == 1" class="buy-this-app-class">
+	<button ion-button class="button-size" (click)="buyThisApp()" round>
+		<ion-icon name="md-cart" class="text-white"></ion-icon> &nbsp;
+		{{'buy_this_app' | translate}}
+	</button>
+</div>

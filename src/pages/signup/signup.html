@@ -1,0 +1,57 @@
+<ion-header class="theme_header">
+    <ion-navbar>
+        <button ion-button menuToggle>
+            <ion-icon name="menu"></ion-icon>
+        </button>
+        <ion-title>
+            <h2>{{'sign_up_now' | translate}}</h2>
+            <p>{{'enter_required_information' | translate}}</p>
+        </ion-title>
+    </ion-navbar>
+</ion-header>
+
+<ion-content class="bg-color">
+    <div class="form">
+        <div class="img_box center_img" (click)="pickImage()">
+            <ion-icon *ngIf="!signUpRequest.image_url || !signUpRequest.image_url.length" class="material-icons">
+                photo_camera
+            </ion-icon>
+            <img *ngIf="signUpRequest.image_url && signUpRequest.image_url.length" data-src="{{signUpRequest.image_url}}">
+        </div>
+        <ion-list no-lines>
+            <ion-item>
+                <ion-label floating>{{'select_country' | translate}}</ion-label>
+                <ion-select [(ngModel)]="countryCode" interface="popover" multiple="false" class="text-thime">
+                    <ion-option [value]="country.callingCodes[0]" *ngFor="let country of countries">{{country.name}}
+                    </ion-option>
+                </ion-select>
+            </ion-item>
+            <ion-item>
+                <ion-label class="text-grey" floating>{{'mobile_number' | translate}}</ion-label>
+                <ion-input type="tel" [(ngModel)]="phoneNumber"></ion-input>
+            </ion-item>
+            <ion-item>
+                <ion-label class="text-grey" floating>{{'enter_full_name' | translate}}</ion-label>
+                <ion-input type="text" [(ngModel)]="signUpRequest.name"></ion-input>
+            </ion-item>
+            <ion-item>
+                <ion-label class="text-grey" floating>{{'enter_email_id' | translate}}</ion-label>
+                <ion-input type="email" [(ngModel)]="signUpRequest.email"></ion-input>
+            </ion-item>
+
+            <ion-item>
+                <ion-label class="text-grey" floating>{{'password' | translate}}</ion-label>
+                <ion-input type="text" [(ngModel)]="signUpRequest.password"></ion-input>
+            </ion-item>
+            <ion-item>
+                <ion-label class="text-grey" floating>{{'password_confirm' | translate}}</ion-label>
+                <ion-input type="password" [(ngModel)]="passwordConfirm"></ion-input>
+            </ion-item>
+        </ion-list>
+    </div>
+</ion-content>
+<ion-footer no-border>
+    <button ion-button full no-margin text-uppercase class="btn" (click)="requestSignUp()">
+        {{'sign_up' | translate}}
+    </button>
+</ion-footer>

@@ -1,0 +1,47 @@
+<ion-header class="theme_header">
+    <ion-navbar>
+        <button ion-button menuToggle>
+            <ion-icon name="menu"></ion-icon>
+        </button>
+        <ion-title>
+            <h2>{{'my_profile' | translate}}</h2>
+            <p>{{'your_account_details' | translate}}</p>
+        </ion-title>
+    </ion-navbar>
+</ion-header>
+
+
+<ion-content class="bg-color">
+    <div class="form animated slideInUp delay_3">
+        <div class="profile_img_box d-flex" (click)="pickImage()">
+            <div class="img_box center_img">
+                <img [src]="savedUser.image_url" class="crop_img" *ngIf="savedUser.image_url">
+                <img src="assets/imgs/empty_dp.png" class="crop_img" *ngIf="!savedUser.image_url">
+            </div>
+            <h2 class="d-flex">
+                <ion-icon class="material-icons">photo_camera</ion-icon>
+                {{'change_picture' | translate}}
+            </h2>
+        </div>
+        <ion-list class="personal_info" no-lines>
+
+			<ion-item>
+				<h4>{{'phone_number' | translate}}</h4>
+				<h5>{{savedUser.mobile_number}}</h5>
+			</ion-item>
+
+			<ion-item>
+				<h4>{{'full_name' | translate}}</h4>
+				<h5>{{savedUser.name}}</h5>
+			</ion-item>
+
+			<ion-item>
+				<h4>{{'email_address' | translate}}</h4>
+				<h5>{{savedUser.email}}</h5>
+			</ion-item>
+		</ion-list>
+    </div>
+</ion-content>
+<!-- <ion-footer no-border>
+    <button ion-button full no-margin text-uppercase class="btn">{{'update_info' | translate}}</button>
+</ion-footer> -->
